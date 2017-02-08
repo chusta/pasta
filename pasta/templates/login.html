@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="login">
+<form role="form" method="POST">
+  <div class="form">
+    <input type="username" id="username" name="username" placeholder="Username" required>
+  </div>
+  <div class="form">
+    <input type="password" id="password" name="password" placeholder="Password" required>
+  </div>
+  <div class="form">
+    <button type="submit">login</button>
+  </div>
+</form>
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+{% for category, message in messages %}
+<div class="form form-error">
+  {{ message }}
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+</div>
+
+{% endblock %}

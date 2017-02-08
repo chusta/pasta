@@ -1,0 +1,7 @@
+venv
+db_login
+*.pyc
+*.swp
+*.log
+*.retry
+.vagrant/

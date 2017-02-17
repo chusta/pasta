@@ -17,5 +17,8 @@ class PastaConfig(object):
     postgresql configuration
     """
     SQLALCHEMY_DATABASE_URI = "postgresql://{}:{}@127.0.0.1:5432/pasta".format(username, password)
-    DEBUG = True
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    DEBUG = False
     SECRET_KEY = os.environ.get("SECRET_KEY", "")
+    MAX_CONTENT_LENGTH = 5 * 1024 * 1024 # 5MB
+    PAGINATION = 10

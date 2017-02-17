@@ -1,12 +1,13 @@
 import datetime
-from sqlalchemy import Column, Integer, String, LargeBinary
-from .database import Base, engine
+from pasta import database
 
 from flask_login import UserMixin
+
+from sqlalchemy import Column, Integer, String, LargeBinary
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 
-class User(Base, UserMixin):
+class User(database.Model, UserMixin):
     """
     database model for users
     describes one-to-many relationship between user:image
@@ -21,7 +22,7 @@ class User(Base, UserMixin):
     images = relationship("Image", backref="user")
 
 
-class Image(Base):
+class Image(database.Model):
     """
     database model for images
     describes many-to-one relationship between image:user
@@ -37,4 +38,4 @@ class Image(Base):
     user_id = Column(Integer, ForeignKey("user.id"))
 
 
-Base.metadata.create_all(engine)
+database.create_all()

@@ -1,14 +1,14 @@
 import os
 import hashlib
 import uuid
+
 from flask import request, redirect, url_for, flash, render_template
 from flask_login import login_required, logout_user, login_user, current_user
 from werkzeug.security import check_password_hash,  generate_password_hash
 from werkzeug.utils import secure_filename
 
 import magic
-from pasta import pasta
-import database
+from pasta import pasta, database
 import models
 
 @pasta.context_processor
@@ -49,11 +49,8 @@ def index(page=1):
     GET requests only.
     (login) landing page for the single-page application
     """
-    images = (
-        models.Image.query
-        .filter_by(user_id=current_user.id)
-        .paginate(page, pasta.config["PAGINATION"])
-    )
+    images = models.Image.query.filter_by(user_id=current_user.id)
+    image_page = images.paginate(page, pasta.config["PAGINATION"])
     # the user has no images ; send to upload page
     if images.count() <= 0:
         return render_template("upload.html", user=current_user)
@@ -86,7 +83,7 @@ def upload():
             name = secure_filename(upload_file.filename[:140]).strip()
 
             # check if current user already has an image with same sha256
-            has_item = database.session.query(models.Image).filter_by(
+            has_item = models.Image.query.filter_by(
                 user_id = current_user.id,
                 sha256 = sha256
             ).first()
@@ -125,7 +122,7 @@ def signup():
         password = request.form["password"]
         confirm = request.form["confirm"]
 
-        has_user = database.session.query(models.User).filter_by(username=username).first()
+        has_user = models.User.query.filter_by(username=username).first()
         if has_user:
             flash("Username already exists.", "danger")
             return redirect(url_for("signup"))
@@ -158,7 +155,7 @@ def login():
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
-        user = database.session.query(models.User).filter_by(username=username).first()
+        user = models.User.query.filter_by(username=username).first()
         if not user or not check_password_hash(user.password, password):
             flash("Incorrect username or password.", "danger")
             return redirect(url_for("login"))

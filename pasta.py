@@ -5,9 +5,10 @@ from pasta import pasta
 
 manager = Manager(pasta)
 
-R = lambda s: "\033[91m{}\033[0m".format(s)
-G = lambda s: "\033[92m{}\033[0m".format(s)
-Y = lambda s: "\033[93m{}\033[0m".format(s)
+@manager.command
+def test():
+    """ ? Test application """
+    print "test"
 
 @manager.command
 def run():

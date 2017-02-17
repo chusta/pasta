@@ -1,10 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="nav">
-UPLOAD
-</div>
-<br/>
-<div class="nav">
-FOOTER
-</div>
+{% for image in images %}
+  {{ image }}
+{% endfor %}
 {% endblock %}

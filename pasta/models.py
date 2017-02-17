@@ -14,11 +14,11 @@ class User(Base, UserMixin):
     __tablename__ = "user"
 
     id = Column(Integer, primary_key=True)
-    username = Column(String(255), unique=True)
-    password = Column(String(255))
+    username = Column(String(255), unique=True, nullable=False)
+    password = Column(String(255), nullable=False)
 
     # reference images ; allow reverse reference
-    images = relationship("Image", back_populates="parent")
+    images = relationship("Image", backref="user")
 
 
 class Image(Base):
@@ -29,12 +29,12 @@ class Image(Base):
     __tablename__ = "image"
 
     id = Column(Integer, primary_key=True)
-    data = Column(LargeBinary)
-    caption = Column(String(140))   # 140 char limit (twitter-esque)
+    data = Column(LargeBinary, nullable=False)
+    caption = Column(String(140), default="")
+    sha256 = Column(String(64), nullable=False)
 
     # reference image owner/user
     user_id = Column(Integer, ForeignKey("user.id"))
-    user = relationship("User", back_populates("images"))
 
 
 Base.metadata.create_all(engine)

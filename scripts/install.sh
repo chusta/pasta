@@ -10,10 +10,6 @@ SYSTEM_PKGS=(
 
 apt install "${SYSTEM_PKGS[@]}"
 
-cd ..
-
 [ ! -d venv ] && virtualenv venv
 source venv/bin/activate
 pip install -r requirements.txt
-
-cd -

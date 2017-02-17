@@ -46,6 +46,19 @@
       become: "{{user}}"
       ignore_errors: true
 
+    - name: cleanup permissions
+      file:
+        state: file
+        owner: "{{user}}"
+        group: "{{user}}"
+        mode: 0600
+        path: "{{home}}/{{item}}"
+      become: "{{user}}"
+      with_items:
+      - .bashrc
+      - .profile
+      ignore_errors: true
+
     - name: update system
       apt:
         update_cache: yes
@@ -88,3 +101,15 @@
       pip:
         requirements: /vagrant/requirements.txt
         state: latest
+
+    - name: generate string
+      shell: >
+        python -c 'import os,binascii;print binascii.hexlify(os.urandom(32))'
+      register: skey
+
+    - name: add key to profile
+      lineinfile:
+        dest: "{{home}}/.profile"
+        regexp: "export SECRET_KEY="
+        line: "export SECRET_KEY='{{skey.stdout}}'"
+      become: "{{user}}"

@@ -25,7 +25,7 @@ body {
 .nav-name {
   font-family: 'Poiret One', cursive;
   font-size: 300%;
-  color: black;
+  color: white;
   padding-bottom: 30px;
   padding-left: 10px;
 }
@@ -47,7 +47,7 @@ body {
   padding-top: 100px;
   position: absolute;
   top: calc(10%);
-  left: calc(50% - 250px);
+  left: calc(50% - 150px);
   font-family: 'Poiret One', cursive;
   font-size: 20px;
   font-weight: 400px;
@@ -71,9 +71,30 @@ body {
   outline: none;
 }
 
+.upload {
+  padding-top: 150px;
+  width: 500px;
+  position: absolute;
+  top: calc(10%);
+  left: calc(50% - 150px);
+  font-size: 20px;
+}
+
+.upload button {
+  height: 30px;
+  width: 100px;
+  color: black;
+}
+
+.upload-text {
+  font-family: 'Poiret One', cursive;
+  font-size: 25px;
+  color: white;
+}
+
 .login button:hover { opacity: 0.3; }
 .login button:active { opacity: 0.3; }
 .login button:focus { opacity: 0.3; }
 
-a:link { color: white; }
 a:hover { background-color: transparent; }
+a:link { color: white; }

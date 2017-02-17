@@ -2,6 +2,6 @@ Flask
 Flask-Login
 Flask-SQLAlchemy
 Flask-Script
-Flask-WTF
 psycopg2
+python-magic
 werkzeug

@@ -8,6 +8,7 @@
     - user: ubuntu
     - name: pasta
     - home: "/home/{{user}}"
+    - mount: "/vagrant"
 
     tasks:
     - name: hostname
@@ -65,7 +66,7 @@
         cache_valid_time: 86400
         upgrade: full
 
-    - name: remove packages
+    - name: remove extra packages
       apt:
         name: "{{item}}"
         state: absent
@@ -80,29 +81,23 @@
       - ruby
       - ruby1.9.1-dev
 
-    - name: system packages
+    - name: install extra packages
       apt:
         name: "{{item}}"
         state: latest
       with_items:
       - curl
       - git
-      - postgresql
-      - postgresql-client
-      - postgresql-contrib
-      - postgresql-server-dev-all
-      - python-pip
       - tmux
       - tree
       - vim
       - xsel
+      - tcpdump
 
-    - name: virtualenv
-      pip:
-        requirements: /vagrant/requirements.txt
-        state: latest
+    - name: run installer script
+      command: "bash ./scripts/install.sh chdir={{mount}}"
 
-    - name: generate string
+    - name: generate secret string
       shell: >
         python -c 'import os,binascii;print binascii.hexlify(os.urandom(32))'
       register: skey

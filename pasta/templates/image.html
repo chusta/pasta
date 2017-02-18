@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<div align="center" class="image-div">
+  <img class="image-edit" src="{{ url_for('image_view', filehash=image.sha256) }}">
+  <div class="image-form text">
+    <form role="form" method="POST">
+      <div class="image-form">
+        <div align="left">
+          <input id="caption" name="caption" placeholder="{{image.caption}}">
+          <label class="text" for="delete">delete?</label>
+          <input type="checkbox" id="delete" name="delete">
+          <button type="submit">submit</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="form text">
+  <p>{{image.caption}}</p>
+  </div>
+</div>
+{% endblock %}

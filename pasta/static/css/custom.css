@@ -38,7 +38,7 @@ body {
 
 .form-error {
   color: white;
-  font-size: 21;
+  font-size: 20;
   font-weight: 400px;
 }
 
@@ -86,10 +86,49 @@ body {
   color: black;
 }
 
+.text {
+  font-family: 'Poiret One', cursive;
+  font-size: 25px;
+  color: white;
+  font-weight: bold;
+}
+
 .upload-text {
   font-family: 'Poiret One', cursive;
   font-size: 25px;
   color: white;
+}
+
+.base {
+  padding: 100px;
+}
+
+.image-div {
+  padding: 10px;
+}
+
+.image-edit {
+  border: 2px solid;
+  height: 500px;
+  width: auto;
+  padding: 1px;
+}
+
+.image-form {
+  width: 500px;
+  color: black;
+}
+
+.image-form button {
+  width: 100px;
+  color: black;
+}
+
+.image {
+  border: 2px solid;
+  height: 300px;
+  width: auto;
+  padding: 1px;
 }
 
 .login button:hover { opacity: 0.3; }

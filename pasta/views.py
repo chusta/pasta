@@ -1,8 +1,9 @@
 import os
+import io
 import hashlib
-import uuid
 
 from flask import request, redirect, url_for, flash, render_template
+from flask import send_file, send_from_directory
 from flask_login import login_required, logout_user, login_user, current_user
 from werkzeug.security import check_password_hash,  generate_password_hash
 from werkzeug.utils import secure_filename
@@ -50,17 +51,80 @@ def index(page=1):
     (login) landing page for the single-page application
     """
     images = models.Image.query.filter_by(user_id=current_user.id)
-    image_page = images.paginate(page, pasta.config["PAGINATION"])
+    page = images.paginate(page, pasta.config["PAGINATION"], False)
     # the user has no images ; send to upload page
     if images.count() <= 0:
-        return render_template("upload.html", user=current_user)
+        return redirect(url_for("upload"))
 
-    return render_template("index.html", user=current_user, images=images)
+    return render_template("index.html", user=current_user, images=page)
 
-@pasta.route("/image/<filehash>", methods=["GET", "POST"])
+@pasta.route("/image/view/<filehash>", methods=["GET"])
 @login_required
-def image(filehash):
-    return filehash
+def image_view(filehash):
+    """
+    GET requests only.
+    (login) retrieve image binary blob for display
+
+    check if current user has an image with input filehash
+        if so, then we display the image
+        if not, then jackie chan
+    """
+    image = (
+        models.Image.query
+        .filter_by(user_id=current_user.id)
+        .filter_by(sha256=filehash)
+    ).first()
+    if image:
+        name = image.caption
+        return send_file(io.BytesIO(image.data),
+            attachment_filename = filehash,
+            mimetype = magic.Magic(mime=True).from_buffer(image.data)
+        )
+    return send_from_directory("static/img", "wut.jpg")
+
+@pasta.route("/image/edit/<filehash>", methods=["GET", "POST"])
+@login_required
+def image_edit(filehash):
+    """
+    GET and POST requests only.
+    (login) allow owner to edit captions or delete images
+
+    if an HTTP GET is received, then we display the image and the caption
+    if an HTTP POST is received, then we process the user input
+    """
+
+    # check if current_user owns an image with specified sha256sum
+    #   if not, then redirect to index
+    image = (
+        models.Image.query
+        .filter_by(user_id=current_user.id)
+        .filter_by(sha256=filehash)
+    ).first()
+    if not image:
+        return redirect(url_for("index"))
+
+    if request.method == "POST":
+        is_changed = False
+
+        # if input caption is populated then update
+        caption = request.form.get("caption")
+        if caption and caption != image.caption:
+            is_changed = True
+            image.caption = caption
+
+        # if input delete is populated then we remove the image
+        delete = request.form.get("delete")
+        if delete:
+            is_changed = True
+            database.session.delete(image)
+
+        if is_changed:
+            database.session.commit()
+
+        return redirect(url_for("index"))
+
+    # (GET) default view
+    return render_template("image.html", user=current_user, image=image)
 
 @pasta.route("/upload", methods=["GET", "POST"])
 @login_required

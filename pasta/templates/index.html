@@ -1,6 +1,20 @@
 {% extends "base.html" %}
 {% block content %}
-{% for image in images %}
-  {{ image }}
+
+<div class="base text">
+  <div style="float: left; width: 50%;" align="left">
+  {% if images.has_prev %}
+    <a href="{{ url_for('index', page=images.prev_num) }}">last 10 images</a>
+  {% endif %}
+  </div>
+  <div style="float: left; width: 50%;" align="right">
+  {% if images.has_next %}
+    <a href="{{ url_for('index', page=images.next_num) }}">next 10 images</a>
+  {% endif %}
+  </div>
+</div>
+
+{% for image in images.items %}
+<a href="{{ url_for('image_edit', filehash=image.sha256) }}"><img class="image" src="{{ url_for('image_view', filehash=image.sha256) }}" /></a>
 {% endfor %}
 {% endblock %}

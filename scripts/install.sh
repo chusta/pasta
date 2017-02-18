@@ -1,15 +1,13 @@
 #!/bin/bash
+# prerequisite installation script
+
 [ $(id -u) -ne 0 ] && echo "run as root." && exit
 
 SYSTEM_PKGS=(
+  python-pip
   postgresql
-  postgresql-client
-  postgresql-server-all
-  virtualenv
+  postgresql-server-dev-all
 )
 
-apt install "${SYSTEM_PKGS[@]}"
-
-[ ! -d venv ] && virtualenv venv
-source venv/bin/activate
+apt-get -y install "${SYSTEM_PKGS[@]}"
 pip install -r requirements.txt

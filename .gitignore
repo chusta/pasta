@@ -5,3 +5,5 @@ db_login
 *.log
 *.retry
 .vagrant/
+app.crt
+app.key

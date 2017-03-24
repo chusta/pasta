@@ -2,6 +2,7 @@
 
 upload and comment on images
 
+
 ## getting started
 
 0. Run the installer from the project base path, as root. Python
@@ -39,3 +40,8 @@ pasta will be listening on http://0.0.0.0:8080
 
 ## login
 pasta requires the user to login before use
+
+## testing
+```
+python test/test.py -v
+```

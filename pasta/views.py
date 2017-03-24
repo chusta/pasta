@@ -1,16 +1,22 @@
 import os
 import io
 import hashlib
+import time
 
 from flask import request, redirect, url_for, flash, render_template
 from flask import send_file, send_from_directory
-from flask_login import login_required, logout_user, login_user, current_user
-from werkzeug.security import check_password_hash,  generate_password_hash
+from flask_login import logout_user, login_user, current_user, fresh_login_required
+from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 
 import magic
 from pasta import pasta, database
 import models
+
+@pasta.after_request
+def remove_server(response):
+    response.headers["Server"] = "Server"
+    return response
 
 @pasta.context_processor
 def override_url_for():
@@ -33,7 +39,7 @@ def dated_url_for(endpoint, **values):
     return url_for(endpoint, **values)
 
 @pasta.route("/logout", methods=["GET"])
-@login_required
+@fresh_login_required
 def logout():
     """
     GET requests only.
@@ -44,13 +50,14 @@ def logout():
 
 @pasta.route("/", methods=["GET"])
 @pasta.route("/<int:page>", methods=["GET"])
-@login_required
+@fresh_login_required
 def index(page=1):
     """
     GET requests only.
     (login) landing page for the single-page application
     """
     images = models.Image.query.filter_by(user_id=current_user.id)
+    images = images.order_by(models.Image.id.asc())
     page = images.paginate(page, pasta.config["PAGINATION"], False)
     # the user has no images ; send to upload page
     if images.count() <= 0:
@@ -58,9 +65,10 @@ def index(page=1):
 
     return render_template("index.html", user=current_user, images=page)
 
+@pasta.route("/image/view/", methods=["GET"])
 @pasta.route("/image/view/<filehash>", methods=["GET"])
-@login_required
-def image_view(filehash):
+@fresh_login_required
+def image_view(filehash=None):
     """
     GET requests only.
     (login) retrieve image binary blob for display
@@ -69,6 +77,9 @@ def image_view(filehash):
         if so, then we display the image
         if not, then jackie chan
     """
+    if filehash is None:
+        return send_from_directory("static/img", "wut.jpg")
+
     image = (
         models.Image.query
         .filter_by(user_id=current_user.id)
@@ -82,9 +93,10 @@ def image_view(filehash):
         )
     return send_from_directory("static/img", "wut.jpg")
 
+@pasta.route("/image/edit/", methods=["GET", "POST"])
 @pasta.route("/image/edit/<filehash>", methods=["GET", "POST"])
-@login_required
-def image_edit(filehash):
+@fresh_login_required
+def image_edit(filehash=None):
     """
     GET and POST requests only.
     (login) allow owner to edit captions or delete images
@@ -92,6 +104,8 @@ def image_edit(filehash):
     if an HTTP GET is received, then we display the image and the caption
     if an HTTP POST is received, then we process the user input
     """
+    if filehash is None:
+        return redirect(url_for("index"))
 
     # check if current_user owns an image with specified sha256sum
     #   if not, then redirect to index
@@ -127,7 +141,7 @@ def image_edit(filehash):
     return render_template("image.html", user=current_user, image=image)
 
 @pasta.route("/upload", methods=["GET", "POST"])
-@login_required
+@fresh_login_required
 def upload():
     """
     GET and POST requests only.
@@ -188,11 +202,9 @@ def signup():
 
         has_user = models.User.query.filter_by(username=username).first()
         if has_user:
-            flash("Username already exists.", "danger")
             return redirect(url_for("signup"))
 
         if password != confirm:
-            flash("Password does not match.", "danger")
             return redirect(url_for("signup"))
 
         # unique username and password/confirm matches ; add to db
@@ -200,10 +212,14 @@ def signup():
             username = username,
             password = generate_password_hash(password)
         )
-        database.session.add(user)
-        database.session.commit()
-        flash("Account successfully created.", "info")
-        return redirect(url_for("login"))
+        try:
+            database.session.add(user)
+            database.session.commit()
+            flash("Account successfully created.", "info")
+            return redirect(url_for("login"))
+        except Exception:
+            database.session.rollback()
+            return render_template("signup.html", user=current_user)
     else:
         return render_template("signup.html", user=current_user)
 
@@ -220,9 +236,17 @@ def login():
         username = request.form["username"]
         password = request.form["password"]
         user = models.User.query.filter_by(username=username).first()
-        if not user or not check_password_hash(user.password, password):
+
+        # generate_password_hash used to prevent valid user enumeration
+        if not user:
+            generate_password_hash(password)
             flash("Incorrect username or password.", "danger")
             return redirect(url_for("login"))
+
+        if not check_password_hash(user.password, password):
+            flash("Incorrect username or password.", "danger")
+            return redirect(url_for("login"))
+
         login_user(user)
         return redirect(request.args.get('next') or url_for("index"))
     else:

@@ -1,9 +1,5 @@
-import base64
-import datetime
-import json
 import hashlib
 import logging
-import magic
 import os
 import re
 import requests
@@ -13,7 +9,6 @@ import unittest
 
 from urlparse import urlparse
 from StringIO import StringIO
-from PIL import Image
 
 from flask_login import current_user
 from flask import session
@@ -32,7 +27,6 @@ from pasta import models, database
 from pasta import pasta as app
 
 sha256sum = lambda x: hashlib.sha256(x).hexdigest()
-mime_type = lambda x: magic.Magic(mime=True).from_buffer(x)
 
 def create_testuser(username, password):
     try:

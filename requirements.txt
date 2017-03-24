@@ -3,5 +3,7 @@ Flask-Login
 Flask-SQLAlchemy
 Flask-Script
 psycopg2
+pyopenssl
 python-magic
+requests
 werkzeug
